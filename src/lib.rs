@@ -49,8 +49,9 @@ pub trait ParseHelper: AsRef<[u8]> {
     }
 
     /// Returns the smallest first slice found from the start that matches the condition
-    fn take_smallest_err<E: Debug, F: Fn(&[u8]) -> bool>(&self, f: F, err: E) -> Result<(&[u8], &[u8]), E> {
-        for i in 1..self.as_ref().len() {
+    /// i.e. it runs the function until the first time it is true
+    fn take_smallest_err<E: Debug, F: Fn(&[u8]) -> bool>(&self, f: F, min_size: usize, err: E) -> Result<(&[u8], &[u8]), E> {
+        for i in min_size..self.as_ref().len() {
             if f(&self.as_ref()[..i]) {
                 return Ok((&self.as_ref()[..i], &self.as_ref()[i..]))
             }
@@ -58,10 +59,11 @@ pub trait ParseHelper: AsRef<[u8]> {
         Err(err)
     }
 
-    /// Returns the largest first slice found from the start that matches the condition.
-    fn take_largest_err<E: Debug, F: Fn(&[u8]) -> bool>(&self, f: F, err: E) -> Result<(&[u8], &[u8]), E> {
+    /// Returns the largest slice found from the start that matches the condition.
+    /// i.e. it runs the function until the last time it is true
+    fn take_largest_err<E: Debug, F: Fn(&[u8]) -> bool>(&self, f: F, min_size:usize, err: E) -> Result<(&[u8], &[u8]), E> {
         let mut largest = None;
-        for i in 1..self.as_ref().len() {
+        for i in min_size..self.as_ref().len() {
             if f(&self.as_ref()[..i]) {
                 largest = Some(i);
             }
@@ -106,9 +108,9 @@ mod test {
     #[test]
     fn take_smallest() {
         let source = b"aaaabbbbcccc";
-        assert!(source.take_smallest_err(|s| s.starts_with(b"bbbb"), ()).is_err());
+        assert!(source.take_smallest_err(|s| s.starts_with(b"bbbb"), 0, ()).is_err());
 
-        let (first ,second) = source.take_smallest_err(|s| !s.contains(&b"b"[0]), ()).unwrap();
+        let (first ,second) = source.take_smallest_err(|s| !s.contains(&b"b"[0]), 0, ()).unwrap();
         assert_eq!(first, b"a");
         assert_eq!(second, b"aaabbbbcccc");
     }
@@ -118,10 +120,10 @@ mod test {
         let source = b"aaaabbbbcccc";
 
         let func = |s: &[u8]| s.starts_with(b"b");
-        assert!(source.take_largest_err(func, ()).is_err());
+        assert!(source.take_largest_err(func, 0, ()).is_err());
 
         let func = |s: &[u8]| !s.contains(&b"b"[0]);
-        let (first, second) = source.take_largest_err(func, ()).unwrap();
+        let (first, second) = source.take_largest_err(func, 0, ()).unwrap();
         assert_eq!(first, b"aaaa");
         assert_eq!(second, b"bbbbcccc");
     }
