@@ -8,7 +8,7 @@ pub trait ParseHelper: AsRef<[u8]> {
         if source.len() < pattern.len() {
             return Err(());
         }
-        for i in 0..source.len() - pattern.len() {
+        for i in 0..=source.len() - pattern.len() {
             if source[i..].starts_with(pattern) {
                 return Ok((&source[..i], &source[i..]));
             }
@@ -78,6 +78,7 @@ pub trait ParseHelper: AsRef<[u8]> {
 impl ParseHelper for &[u8] {}
 impl ParseHelper for [u8] {}
 impl ParseHelper for Vec<u8> {}
+impl ParseHelper for &str {}
 
 #[cfg(test)]
 mod test {
@@ -90,6 +91,10 @@ mod test {
         let (before, after) = source.take_until(pattern).unwrap();
         assert_eq!(before, b"hello");
         assert_eq!(after, b" world");
+
+        let (before,after) = "GET / HTTP/1.1\r\n\r\n".take_until(b"\r\n\r\n").unwrap();
+        assert_eq!(before, b"GET / HTTP/1.1");
+        assert_eq!(after, b"\r\n\r\n");
     }
 
     #[test]
