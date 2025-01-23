@@ -5,6 +5,9 @@ pub trait ParseHelper: AsRef<[u8]> {
     /// Skips prefix of slice until sequence is found
     fn take_until(&self, pattern: &[u8]) -> Result<(&[u8], &[u8]), ()> {
         let source = self.as_ref();
+        if source.len() < pattern.len() {
+            return Err(());
+        }
         for i in 0..source.len() - pattern.len() {
             if source[i..].starts_with(pattern) {
                 return Ok((&source[..i], &source[i..]));
