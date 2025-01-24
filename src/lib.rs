@@ -51,6 +51,14 @@ pub trait ParseHelper: AsRef<[u8]> {
         self.take_expect(pattern).map_err(|_| err)
     }
 
+    /// If the next pattern is optional, it may return it, otherwise it returns the original slice
+    fn maybe_expect<E: Debug>(&self, pattern: &[u8]) -> (Some(&[u8]), &[u8]) {
+        match self.take_expect(pattern) {
+            Ok((first, second)) => (Some(first), second),
+            Err(_) => (None, self)
+        }
+    }
+
     /// Returns the smallest first slice found from the start that matches the condition
     /// i.e. it runs the function until the first time it is true
     fn take_smallest_err<E: Debug, F: Fn(&[u8]) -> bool>(&self, f: F, min_size: usize, err: E) -> Result<(&[u8], &[u8]), E> {
