@@ -52,10 +52,10 @@ pub trait ParseHelper: AsRef<[u8]> {
     }
 
     /// If the next pattern is optional, it may return it, otherwise it returns the original slice
-    fn maybe_expect<E: Debug>(&self, pattern: &[u8]) -> (Some(&[u8]), &[u8]) {
+    fn maybe_expect<E: Debug>(&self, pattern: &[u8]) -> (Option<&[u8]>, &[u8]) {
         match self.take_expect(pattern) {
             Ok((first, second)) => (Some(first), second),
-            Err(_) => (None, self)
+            Err(_) => (None, self.as_ref())
         }
     }
 
