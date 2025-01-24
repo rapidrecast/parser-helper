@@ -38,6 +38,9 @@ pub trait ParseHelper: AsRef<[u8]> {
     /// Returns a slice of the provided pattern and the rest of the slice
     fn take_expect(&self, pattern: &[u8]) -> Result<(&[u8], &[u8]), &[u8]> {
         let source = self.as_ref();
+        if source.len() < pattern.len() {
+            return Err(source);
+        }
         for i in 0..pattern.len() {
             if source[i] != pattern[i] {
                 return Err(source);
