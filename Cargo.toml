@@ -2,5 +2,11 @@
 name = "parser-helper"
 version = "0.1.0"
 edition = "2021"
+authors = [
+    "RapidRecast <hugh@rapidrecast.io>",
+]
+description = "Helpers for handling buffers of bytes"
+license = "GPL-3.0-only"
+
 
 [dependencies]
